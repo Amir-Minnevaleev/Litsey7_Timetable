@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Montserrat;
+    height: 33%;
+    width: 20%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    transition: background 1s ease-in-out;
+}
+
+.content {
+    text-align: center;
+    font-size: 3rem;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    user-select: none;
+
+}
+
+.weather-icon {
+    width: 100px;
+    height: 100px;
+}
+
+@media (min-width: 1200px) {
+    body {
+        font-size: 4rem;
+    }
+
+    .weather-icon {
+        width: 150px;
+        height: 150px;
+    }
+}
