@@ -13,7 +13,13 @@
 
 <body>
 
-    <div class="container">
+    <!-- Лоадер -->
+    <div id="loader" class="loader-container">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Основной контент -->
+    <div class="container" id="main-content" style="display: none;">
         <!-- Заголовок для даты -->
         <h1 id="date-heading"></h1>
 
@@ -21,10 +27,16 @@
         <div class="timetable" id="timetable">
             <!-- Здесь будет отображаться расписание -->
         </div>
-        <div class="window1" id="window1"></div>
-    
+
+        <!-- Окошко с датой, временем и распорядком дня -->
+        <div class="datetime-window" id="datetime-window">
+            <h1 id="current-date"></h1>
+            <h2 id="current-time"></h2>
+            <div id="daily-routine">
+                <!-- Здесь будет отображаться распорядок дня -->
+            </div>
+        </div>
     </div>
-    
 
 </body>
 

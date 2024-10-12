@@ -4,12 +4,12 @@
  // Функция получения списка уведомлений
  async function fetchNotifications() {
    const response = await fetch(baseUrl + "notifications");
-   return (await response.json())[0];
+   return (await response.json());
  }
  // Функция получения расписания дня
  async function fetchDailyRoutine() {
    const response = await fetch(baseUrl + "daily_routine");
-   return (await response.json())[0];
+   return (await response.json());
  }
 // Функция получения списка уроков
 // Урл api
@@ -70,6 +70,102 @@ async function displayLessonSchedule() {
     // Вставляем таблицу в контейнер расписания
     timetableDiv.appendChild(table);
 }
+// Функция для получения и отображения текущей даты и времени
+// Функция для отображения даты и времени
+function updateDateTime() {
+    const dateElement = document.getElementById('current-date');
+    const timeElement = document.getElementById('current-time');
 
-// Запуск функции при загрузке страницы
-window.addEventListener('DOMContentLoaded', displayLessonSchedule);
+    const now = new Date();
+    const date = now.toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+    const time = now.toLocaleTimeString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+
+    dateElement.textContent = date;
+    timeElement.textContent = time;
+}
+
+// Обновляем время каждую секунду
+setInterval(updateDateTime, 1000);
+
+// Функция для получения и отображения распорядка дня
+// Функция для получения и отображения распорядка дня
+// Функция для получения и отображения распорядка дня
+async function displayDailyRoutine() {
+    const routineDiv = document.getElementById('daily-routine');
+    const routine = await fetchDailyRoutine(); // Получаем данные из API
+
+    if (!routine || typeof routine !== 'object') {
+        routineDiv.textContent = 'Распорядок дня недоступен.';
+        return;
+    }
+
+    // Очищаем содержимое перед вставкой
+    routineDiv.innerHTML = '<h3>Распорядок дня:</h3>';
+
+    // Функция для рекурсивного отображения данных, если значение объекта — тоже объект
+    function renderObject(obj) {
+        const fragment = document.createDocumentFragment();
+
+        Object.keys(obj).forEach(key => {
+            const value = obj[key];
+
+            const item = document.createElement('p');
+            if (typeof value === 'object' && value !== null) {
+                item.textContent = `${key}:`;
+                fragment.appendChild(renderObject(value)); // Рекурсивно обрабатываем вложенные объекты
+            } else {
+                item.textContent = `${value}`;
+                fragment.appendChild(item);
+            }
+        });
+
+        return fragment;
+    }
+
+    // Добавляем распорядок дня в элемент div
+    routineDiv.appendChild(renderObject(routine));
+}
+// Функция для скрытия лоадера и показа контента
+function hideLoader() {
+    const loader = document.getElementById('loader');
+    const mainContent = document.getElementById('main-content');
+    
+    loader.style.display = 'none'; // Скрываем лоадер
+    mainContent.style.display = 'block'; // Показываем основной контент
+}
+
+// Запуск функций после полной загрузки данных
+window.addEventListener('DOMContentLoaded', async () => {
+    updateDateTime();
+
+    await fetchDailyRoutine();
+    await displayDailyRoutine();
+    
+    await fetchLessonSchedule();
+    await displayLessonSchedule();
+    
+    // Когда все данные загружены, скрываем лоадер
+    hideLoader();
+    
+    // Обновляем время каждую секунду
+    setInterval(updateDateTime, 1000);
+});
+
+
+// Запуск функций при загрузке страницы
+window.addEventListener('DOMContentLoaded', () => {
+    updateDateTime();
+    displayDailyRoutine();
+    
+    fetchLessonSchedule();
+    displayLessonSchedule(); 
+    fetchDailyRoutine();
+});
