@@ -3,6 +3,7 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    caret-color: transparent;
 }
 
 body {
@@ -16,11 +17,13 @@ body {
     justify-content: space-between;
     align-items: flex-start;
     margin: 5vh;
+    /* Это задает выравнивание всех дочерних элементов по верху */
 }
 
 .timetable {
     width: 80%;
     padding: 20px;
+    border: 1px solid black;
 }
 
 .timetable th,
@@ -40,9 +43,12 @@ body {
     width: 20%;
     text-align: center;
     background-color: white;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    padding: 2px;
+    border: 1px solid black;
+    position: relative; /* Это необходимо для выравнивания */
+    right: 0; /* Элемент всегда будет прижат к правой стороне */
+    top: 0;
+    align-self: flex-start; /* Гарантирует, что окно даты и времени будет выровнено по верху таблицы */
 }
 
 #current-date,
@@ -54,7 +60,11 @@ body {
 #daily-routine {
     margin-top: 20px;
     font-size: 1.2rem;
-    color: #333;
+    color: black;
+}
+
+#daily-routine p {
+    padding: 1vh;
 }
 
 /* Лоадер */
@@ -79,6 +89,19 @@ body {
     height: 80px;
     animation: spin 1.5s linear infinite;
 }
+#notifications-container {
+    margin-top: 20px;
+    width: 100%;
+}
+
+.notification-item {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
 
 @keyframes spin {
     0% {
@@ -88,7 +111,6 @@ body {
         transform: rotate(360deg);
     }
 }
-
 
 @media (max-width: 768px) {
     .container {
@@ -103,5 +125,6 @@ body {
     .datetime-window {
         width: 100%;
         margin-top: 20px;
+        position: static; /* Сбрасываем position для мобильных устройств */
     }
 }

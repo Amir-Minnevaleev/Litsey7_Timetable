@@ -1,44 +1,97 @@
- // Урл api
- const baseUrl = "https://li7scheduleapi-production.up.railway.app/api/";
+// Базовый URL для запросов к API
+const baseUrl = "https://li7scheduleapi-production.up.railway.app/api/";
 
- // Функция получения списка уведомлений
- async function fetchNotifications() {
-   const response = await fetch(baseUrl + "notifications");
-   return (await response.json());
- }
- // Функция получения расписания дня
- async function fetchDailyRoutine() {
-   const response = await fetch(baseUrl + "daily_routine");
-   return (await response.json());
- }
-// Функция получения списка уроков
-// Урл api
-
-// Функция получения списка уроков с API
-async function fetchLessonSchedule() {
+// Функция получения списка уведомлений
+async function fetchNotifications() {
     try {
-        const response = await fetch(baseUrl + "lesson_schedule"); // Запрос к API
+        const response = await fetch(baseUrl + "notifications"); // Запрос к API
         if (!response.ok) {
-            throw new Error(`Ошибка HTTP: ${response.status}`); // Обработка ошибок
+            throw new Error(`Ошибка HTTP: ${response.status}`);
         }
-
-        const data = await response.json(); // Ожидаем JSON с расписанием
-        console.log("Данные расписания с API:", data); // Логируем полученные данные для проверки
-
-        return data[0]; // Возвращаем первый элемент данных
+        return await response.json(); // Ожидаем JSON с уведомлениями
     } catch (error) {
-        console.error("Ошибка при получении расписания:", error);
-        return null; // Возвращаем null в случае ошибки
+        console.error("Ошибка при получении уведомлений:", error);
+        return [];
     }
 }
 
-// Функция для отображения даты и расписания в HTML
+// Функция получения расписания дня
+async function fetchDailyRoutine() {
+    try {
+        const response = await fetch(baseUrl + "daily_routine"); // Запрос к API
+        if (!response.ok) {
+            throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+        return await response.json(); // Ожидаем JSON с распорядком дня
+    } catch (error) {
+        console.error("Ошибка при получении распорядка дня:", error);
+        return null;
+    }
+}
+
+// Функция получения полного списка уроков
+async function fetchFullLessonSchedule() {
+    try {
+        const response = await fetch(baseUrl + "full_lesson_schedule"); // Запрос к API
+        if (!response.ok) {
+            throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+        return await response.json(); // Ожидаем JSON с полным расписанием
+    } catch (error) {
+        console.error("Ошибка при получении полного расписания:", error);
+        return null;
+    }
+}
+
+// Функция получения списка уроков по дате
+async function fetchLessonSchedule(date) {
+    try {
+        const response = await fetch(baseUrl + "lesson_schedule?date=" + date); // Запрос к API по дате
+        if (!response.ok) {
+            throw new Error(`Ошибка HTTP: ${response.status}`);
+        }
+        return await response.json(); // Ожидаем JSON с расписанием
+    } catch (error) {
+        console.error("Ошибка при получении расписания уроков:", error);
+        return null;
+    }
+}
+
+// Функция для отображения уведомлений на странице
+async function displayNotifications() {
+    const notificationsContainer = document.getElementById('notifications-container');
+    const notifications = await fetchNotifications(); // Получаем уведомления из API
+
+    if (!notifications || notifications.length === 0) {
+        notificationsContainer.innerHTML = '<p>Нет новых уведомлений.</p>';
+        return;
+    }
+
+    // Очищаем содержимое контейнера перед вставкой данных
+    notificationsContainer.innerHTML = '';
+
+    // Создаем элементы для каждого уведомления
+    notifications.forEach(notification => {
+        const notificationItem = document.createElement('div');
+        notificationItem.classList.add('notification-item');
+        notificationItem.innerHTML = `
+            <h3>${notification.title || 'Без заголовка'}</h3>
+            <p>${notification.description || 'Без содержания'}</p>
+        `;
+
+        notificationsContainer.appendChild(notificationItem); // Вставляем уведомление в контейнер
+    });
+}
+
+// Функция для отображения даты и расписания уроков на странице
 async function displayLessonSchedule() {
     const timetableDiv = document.getElementById('timetable');
     const dateHeading = document.getElementById('date-heading');
-    const schedule = await fetchLessonSchedule(); // Получаем расписание с API
+    const today = new Date().toISOString().split('T')[0]; // Формат YYYY-MM-DD
+    const schedule = await fetchLessonSchedule(today);
+    // Получаем расписание с API
 
-    if (!schedule || !schedule.lessons || !schedule.lessons[0] || !schedule.lessons[0].lessons) {
+    if (!schedule || !schedule.lessons || !schedule.lessons.length || !schedule.lessons[0].lessons) {
         timetableDiv.innerHTML = '<p>Не удалось загрузить расписание.</p>';
         return;
     }
@@ -54,13 +107,14 @@ async function displayLessonSchedule() {
     table.innerHTML = `
         <thead>
             <tr>
-                <th>${schedule.lessons[0].class}</th>
+                <th>Предмет</th>
+                <th>Кабинет</th>
             </tr>
         </thead>
         <tbody>
             ${schedule.lessons[0].lessons.map(lesson => `
                 <tr>
-                    <td>${lesson.name || "Без названия"},</td>
+                    <td>${lesson.name || "Без названия"}</td>
                     <td>${lesson.classroom || "Не указано"}</td>
                 </tr>
             `).join('')}
@@ -70,8 +124,9 @@ async function displayLessonSchedule() {
     // Вставляем таблицу в контейнер расписания
     timetableDiv.appendChild(table);
 }
-// Функция для получения и отображения текущей даты и времени
-// Функция для отображения даты и времени
+
+
+// Функция для обновления даты и времени
 function updateDateTime() {
     const dateElement = document.getElementById('current-date');
     const timeElement = document.getElementById('current-time');
@@ -95,12 +150,10 @@ function updateDateTime() {
 // Обновляем время каждую секунду
 setInterval(updateDateTime, 1000);
 
-// Функция для получения и отображения распорядка дня
-// Функция для получения и отображения распорядка дня
-// Функция для получения и отображения распорядка дня
+// Функция для отображения распорядка дня на странице
 async function displayDailyRoutine() {
     const routineDiv = document.getElementById('daily-routine');
-    const routine = await fetchDailyRoutine(); // Получаем данные из API
+    const routine = await fetchDailyRoutine(); // Получаем распорядок дня с API
 
     if (!routine || typeof routine !== 'object') {
         routineDiv.textContent = 'Распорядок дня недоступен.';
@@ -133,39 +186,23 @@ async function displayDailyRoutine() {
     // Добавляем распорядок дня в элемент div
     routineDiv.appendChild(renderObject(routine));
 }
+
 // Функция для скрытия лоадера и показа контента
 function hideLoader() {
     const loader = document.getElementById('loader');
     const mainContent = document.getElementById('main-content');
-    
+
     loader.style.display = 'none'; // Скрываем лоадер
     mainContent.style.display = 'block'; // Показываем основной контент
 }
 
-// Запуск функций после полной загрузки данных
-window.addEventListener('DOMContentLoaded', async () => {
-    updateDateTime();
-
-    await fetchDailyRoutine();
-    await displayDailyRoutine();
-    
-    await fetchLessonSchedule();
-    await displayLessonSchedule();
-    
-    // Когда все данные загружены, скрываем лоадер
-    hideLoader();
-    
-    // Обновляем время каждую секунду
-    setInterval(updateDateTime, 1000);
-});
-
-
 // Запуск функций при загрузке страницы
-window.addEventListener('DOMContentLoaded', () => {
-    updateDateTime();
-    displayDailyRoutine();
-    
-    fetchLessonSchedule();
-    displayLessonSchedule(); 
-    fetchDailyRoutine();
+window.addEventListener('DOMContentLoaded', async () => {
+    updateDateTime(); // Запускаем обновление даты и времени
+
+    await displayNotifications(); // Отображаем уведомления
+    await displayDailyRoutine(); // Отображаем распорядок дня
+    await displayLessonSchedule(); // Отображаем расписание уроков
+
+    hideLoader(); // Скрываем лоадер после загрузки данных
 });
